@@ -1,0 +1,17 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.main {
+    height: 100%;
+    max-width: 300px;
+    padding: 1em 0.5em;
+    text-align: center;
+}
+
+.textInput button {
+    position: relative;
+    display: block;
+    margin: 0.5em auto;
+}
