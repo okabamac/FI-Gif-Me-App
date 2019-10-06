@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef }from 'react';
 import axios from 'axios';
+import TwitterShare from './TwitterShare'
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, Input } from '@material-ui/core'
 import InputLabel from '@material-ui/core/InputLabel';
@@ -7,8 +8,8 @@ import FormControl from '@material-ui/core/FormControl';
 
 const useStyles = makeStyles(theme => ({
     root: {
-        display: 'flex',
-        flexWrap: 'wrap',
+        display: 'block',
+        textAlign: 'center'
     },
     formControl: {
         margin: theme.spacing(1),
@@ -23,14 +24,14 @@ export default function GifTranslation() {
         text: '',
         error: false,
         loading: false,
-        data: [],
+        img_url: '',
         found: false,
     });
-
-    const inputLabel = React.useRef(null);
-    const [labelWidth, setLabelWidth] = React.useState(0);
+    const inputLabel = useRef(null);
+    const [labelWidth, setLabelWidth] = useState(1);
 
     const handleChange = name => event => {
+        event.persist();
         setState({
             ...state,
             [name]: event.target.value,
@@ -43,7 +44,7 @@ export default function GifTranslation() {
             ...state,
             error: false,
             loading: false,
-            data: [],
+            img_url: '',
             found: false,
         });
         try {
@@ -62,10 +63,11 @@ export default function GifTranslation() {
             });
             setState({
                 ...state,
-                data: response.data,
-                loading: false
+                img_url: response.data.data.images.downsized.url,
+                loading: false,
+                error: false,
+                found: true,
             });
-            console.log(state.data);
         } catch (error) {
             setState({
                 ...state,
@@ -74,22 +76,44 @@ export default function GifTranslation() {
             });
         }
     };
+
     return (
-        <div className={classes.root}>
-            <FormControl className={classes.formControl}>
-                {/* <InputLabel htmlFor="age-native-simple">Age</InputLabel> */}
+        <div>
+            <form className={classes.formControl} onSubmit={handleSubmit}>
+                {/* <InputLabel htmlFor="Text Input">Enter text</InputLabel> */}
                 <div className='textInput'>
                     <Input
-                        placeholder="Enter text here"
                         value={state.text}
+                        name="Text Input"
                         onChange={handleChange('text')}
+                        placeholder="Enter text here"
                     />
-                    <Button variant="contained" color="primary" onClick={handleSubmit}>
+                    <Button variant="contained" color="primary" type="submit" onClick={handleSubmit}>
                         Gif it
                 </Button>
                 </div>
-            </FormControl>
-            <div className='fetchedGif'>
+            </form>
+            <div>
+                {state.loading ? (
+                    <div className="loader" />
+                ) : (
+                        <div>
+                            {!state.found && state.error ? (
+                                <span className="message" style={{ color: "red" }}>
+                                    <p>Something went wrong, please try again</p>
+                                </span>
+                            ) : (
+                                    <div className="message">
+                                        {state.img_url &&
+                                        <div>
+                                            <img src={state.img_url} />
+                                            <TwitterShare url={state.img_url}/>
+                                        </div>
+                                        }
+                                    </div>
+                                )}
+                        </div>
+                    )}
             </div>
         </div>
     );
